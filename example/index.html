@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Webphone example</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+
+        --wp-agent: #059f6f;
+        --wp-you: #6366f1;
+        --wp-danger: #ef4444;
+
+        --wp-paper: #f5f6fb;
+        --wp-panel: #ffffff;
+        --wp-line: #e1e3ee;
+        --wp-ink: #15161f;
+        --wp-muted: #676c80;
+        --wp-accent: #0a8f63;
+        --wp-accent-wash: #d9f2e8;
+        --wp-shadow: 0 1px 2px rgb(20 20 40 / 0.04), 0 16px 32px -12px rgb(20 20 40 / 0.12);
+
+        --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Consolas, monospace;
+        --font-body: -apple-system, "Segoe UI", system-ui, sans-serif;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --wp-paper: #0a0b10;
+          --wp-panel: #12141c;
+          --wp-line: #242737;
+          --wp-ink: #e9ebf3;
+          --wp-muted: #8b90a6;
+          --wp-accent: #34d399;
+          --wp-accent-wash: #0f3d30;
+          --wp-shadow: none;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: var(--font-body);
+        font-size: 15px;
+        line-height: 1.55;
+        max-width: 34rem;
+        margin: 0 auto;
+        padding: 3rem 1.25rem 4rem;
+        background: var(--wp-paper);
+        color: var(--wp-ink);
+      }
+      main {
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+      }
+      h1 {
+        font-family: var(--font-mono);
+        font-size: 1.3rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        margin: 0;
+        text-wrap: balance;
+      }
+      .target {
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        color: var(--wp-accent);
+        margin: 0.4rem 0 0;
+      }
+      .lede {
+        color: var(--wp-muted);
+        margin: 0.6rem 0 0;
+        max-width: 32ch;
+      }
+      .lede code {
+        font-family: var(--font-mono);
+        font-size: 0.85em;
+      }
+
+      .setup {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+      }
+      .field {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .field span {
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--wp-muted);
+      }
+      .field input {
+        font-family: var(--font-mono);
+        font-variant-numeric: tabular-nums;
+        font-size: 0.85rem;
+        color: var(--wp-ink);
+        background: var(--wp-panel);
+        border: 1px solid var(--wp-line);
+        border-radius: 10px;
+        padding: 10px 12px;
+        width: 100%;
+      }
+      .btn {
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        font-weight: 600;
+        border-radius: 10px;
+        padding: 10px 16px;
+        border: 1px solid transparent;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+      .btn-ghost {
+        background: var(--wp-panel);
+        border-color: var(--wp-line);
+        color: var(--wp-muted);
+      }
+      .btn-ghost:hover {
+        color: var(--wp-ink);
+      }
+      .btn-primary {
+        background: var(--wp-agent);
+        color: #fff;
+      }
+      .btn-primary:hover:enabled {
+        filter: brightness(1.08);
+      }
+      .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+      input:focus-visible,
+      button:focus-visible {
+        outline: 2px solid var(--wp-accent);
+        outline-offset: 2px;
+      }
+
+      .wp-root {
+        display: none;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .wp-root:not([data-status="idle"]) {
+        display: flex;
+      }
+      .wp-stage,
+      .wp-dock {
+        display: none;
+      }
+      .wp-root[data-status="connected"] .wp-stage,
+      .wp-root[data-status="ended"] .wp-stage {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 14px;
+      }
+      .wp-root[data-status="connected"] .wp-dock,
+      .wp-root[data-status="ended"] .wp-dock {
+        display: flex;
+      }
+      .wp-tile {
+        background: var(--wp-panel);
+        border: 1px solid var(--wp-line);
+        border-radius: 16px;
+        box-shadow: var(--wp-shadow);
+        display: flex;
+        flex-direction: column;
+        min-height: 220px;
+        overflow: hidden;
+        transition: opacity 200ms ease;
+      }
+      .wp-root[data-status="ended"] .wp-tile {
+        opacity: 0.55;
+      }
+      .wp-head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 14px;
+        color: var(--wp-muted);
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .wp-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--wp-series);
+        flex: none;
+      }
+      .wp-pill {
+        margin-left: auto;
+        text-transform: none;
+        letter-spacing: 0;
+        font-size: 0.72rem;
+        padding: 3px 9px;
+        border-radius: 999px;
+        border: 1px solid var(--wp-line);
+        color: var(--wp-muted);
+        white-space: nowrap;
+      }
+      .wp-pill[data-active="1"] {
+        color: var(--wp-ink);
+        border-color: var(--wp-series);
+        background: color-mix(in srgb, var(--wp-series) 20%, transparent);
+      }
+      .wp-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        padding: 8px 14px;
+      }
+      .wp-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: color-mix(in srgb, var(--wp-series) 14%, var(--wp-panel));
+        border: 1px solid color-mix(in srgb, var(--wp-series) 45%, transparent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        user-select: none;
+        transition:
+          box-shadow 120ms ease,
+          border-color 120ms ease;
+      }
+      .wp-avatar[data-speaking="1"] {
+        border-color: var(--wp-series);
+        box-shadow: 0 0 0 6px color-mix(in srgb, var(--wp-series) 18%, transparent);
+      }
+      .wp-level {
+        width: 100%;
+        max-width: 210px;
+        height: 6px;
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--wp-series) 16%, var(--wp-panel));
+        overflow: hidden;
+      }
+      .wp-level span {
+        display: block;
+        height: 100%;
+        width: 0%;
+        border-radius: 999px;
+        background: var(--wp-series);
+        will-change: width;
+      }
+      .wp-foot {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        border-top: 1px solid var(--wp-line);
+        color: var(--wp-muted);
+        font-size: 0.7rem;
+        font-family: var(--font-mono);
+      }
+      .wp-dock {
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+      .wp-circle {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 1px solid var(--wp-line);
+        background: var(--wp-panel);
+        color: var(--wp-ink);
+        font-size: 1rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .wp-circle:hover:enabled {
+        border-color: var(--wp-muted);
+      }
+      .wp-circle:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+      .wp-circle[data-on="1"] {
+        background: var(--wp-danger);
+        border-color: var(--wp-danger);
+        color: #fff;
+      }
+      .wp-hang {
+        height: 44px;
+        padding: 0 20px;
+        border-radius: 999px;
+        border: none;
+        background: var(--wp-danger);
+        color: #fff;
+        font-family: var(--font-mono);
+        font-weight: 600;
+        font-size: 0.82rem;
+        cursor: pointer;
+      }
+      .wp-hang:hover:enabled {
+        filter: brightness(1.1);
+      }
+      .wp-hang:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+      .wp-audio-cta {
+        height: 44px;
+        padding: 0 16px;
+        border-radius: 999px;
+        border: 1px solid var(--wp-accent);
+        background: var(--wp-accent-wash);
+        color: var(--wp-accent);
+        font-family: var(--font-mono);
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 0.82rem;
+      }
+      .wp-statusline {
+        text-align: center;
+        color: var(--wp-muted);
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .wp-tile,
+        .wp-avatar {
+          transition: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Webphone example</h1>
+        <p class="target">→ POST localhost:8080/call</p>
+        <p class="lede">
+          Calls the token-service in this repo. See the
+          <code>README</code> before pointing this anywhere but localhost.
+        </p>
+      </header>
+
+      <div class="setup">
+        <label class="field">
+          <span>Continuity key</span>
+          <input id="continuity" />
+        </label>
+        <button id="new-key" class="btn btn-ghost" type="button">New key</button>
+        <button id="call" class="btn btn-primary" type="button">Call</button>
+      </div>
+
+      <div class="wp-root" data-status="idle">
+        <div class="wp-stage">
+          <div class="wp-tile" style="--wp-series: var(--wp-agent)">
+            <div class="wp-head">
+              <span class="wp-dot"></span> AI agent
+              <span class="wp-pill" data-role="agent-state">Idle</span>
+            </div>
+            <div class="wp-body">
+              <div class="wp-avatar" data-role="avatar-agent">🤖</div>
+              <div class="wp-level"><span data-role="level-agent"></span></div>
+            </div>
+            <div class="wp-foot"><span data-role="quality">—</span></div>
+          </div>
+
+          <div class="wp-tile" style="--wp-series: var(--wp-you)">
+            <div class="wp-head">
+              <span class="wp-dot"></span> Local stream (you)
+              <span class="wp-pill" data-role="mic-state">Mic off</span>
+            </div>
+            <div class="wp-body">
+              <div class="wp-avatar" data-role="avatar-you">🧑</div>
+              <div class="wp-level"><span data-role="level-you"></span></div>
+            </div>
+            <div class="wp-foot"><span data-role="device">—</span></div>
+          </div>
+        </div>
+
+        <div class="wp-dock">
+          <button type="button" class="wp-circle" data-role="mute" title="Mute" disabled>
+            🎙️
+          </button>
+          <button type="button" class="wp-audio-cta" data-role="audio" style="display: none">
+            🔊 Enable audio
+          </button>
+          <button type="button" class="wp-hang" data-role="hangup" disabled>Hang up</button>
+        </div>
+        <div class="wp-statusline" data-role="status">Idle</div>
+      </div>
+    </main>
+
+    <audio id="agent-audio" autoplay style="display: none"></audio>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

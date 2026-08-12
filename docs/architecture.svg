@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 320" font-family="system-ui, -apple-system, Segoe UI, sans-serif">
+  <rect width="680" height="320" fill="#ffffff"/>
+
+  <!-- Browser -->
+  <rect x="20" y="30" width="160" height="90" rx="12" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+  <text x="100" y="80" text-anchor="middle" font-size="15" font-weight="600" fill="#1a1a1a">Browser</text>
+
+  <!-- Your backend -->
+  <rect x="260" y="30" width="160" height="90" rx="12" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+  <text x="340" y="70" text-anchor="middle" font-size="15" font-weight="600" fill="#1a1a1a">Your backend</text>
+  <text x="340" y="90" text-anchor="middle" font-size="11" fill="#999">(example: token-service)</text>
+
+  <!-- Platform -->
+  <rect x="500" y="30" width="160" height="90" rx="12" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+  <text x="580" y="80" text-anchor="middle" font-size="15" font-weight="600" fill="#1a1a1a">Platform</text>
+
+  <!-- browser <-> backend -->
+  <line x1="180" y1="60" x2="258" y2="60" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="219" y="50" text-anchor="middle" font-size="10.5" fill="#555">request credential</text>
+
+  <line x1="258" y1="95" x2="180" y2="95" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="219" y="112" text-anchor="middle" font-size="10.5" fill="#555">credential</text>
+
+  <!-- backend <-> platform -->
+  <line x1="420" y1="60" x2="498" y2="60" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="459" y="50" text-anchor="middle" font-size="10.5" fill="#555">with API key</text>
+
+  <line x1="498" y1="95" x2="420" y2="95" stroke="#1a1a1a" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="459" y="112" text-anchor="middle" font-size="10.5" fill="#555">credential</text>
+
+  <!-- direct media connection -->
+  <rect x="20" y="220" width="300" height="70" rx="12" fill="none" stroke="#188038" stroke-width="2"/>
+  <text x="170" y="250" text-anchor="middle" font-size="14" font-weight="600" fill="#188038">Media provider</text>
+  <text x="170" y="268" text-anchor="middle" font-size="10.5" fill="#188038">agent already waiting in the room</text>
+
+  <path d="M 90 120 C 90 180, 130 180, 150 218" fill="none" stroke="#188038" stroke-width="2" marker-end="url(#arrow-green)"/>
+  <text x="330" y="195" font-size="11.5" font-weight="600" fill="#188038">connects directly for the call</text>
+  <text x="330" y="212" font-size="10.5" fill="#188038">never through your backend or the platform</text>
+
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="#1a1a1a"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="#188038"/>
+    </marker>
+  </defs>
+</svg>

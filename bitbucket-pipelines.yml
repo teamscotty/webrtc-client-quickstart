@@ -1,0 +1,10 @@
+pipelines:
+  branches:
+    main:
+      - step:
+          name: Mirror main to GitHub (squashed — no internal history exposed)
+          script:
+            - git checkout --orphan mirror
+            - git add -A
+            - git commit -m "Sync from internal repository"
+            - git push --force git@github.com:teamscotty/webrtc-client-quickstart.git mirror:main
